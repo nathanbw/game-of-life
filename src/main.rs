@@ -9,7 +9,15 @@ fn main() {
     let num_generations: u8           = 100;
     let mut board:       Vec<Vec<u8>> = vec![vec![0; height]; width];
     populate_board_random(&mut board, 20);
+    println!("  Initial state ('+' is a live cell; dead cells are empty):");
     print_board(&board);
+    for cur_gen in 0..num_generations {
+        // It seems to me here that I have a lot of choices:
+        // 1. Give ownership of board to advance_generation wholesale (advance_generation would then return a new board)
+        // 2. Lend advance_generation borrow an immutable reference to board and then return a new board with the new state
+        // 3. Lend advance_generation a mutable reference to board, and advance_generation fills it with the new state
+        advance_generation(&mut board);
+    }
 }
 
 /// Prints the given board
@@ -45,4 +53,10 @@ fn populate_board_random(board: &mut Vec<Vec<u8>>, percent_alive: u8) {
             }
         }
     }
+}
+
+/// Advances the given board by one generation of the Game of Life
+/// Assumes board has dimensions greater than [0][0] and smaller than [100][100]
+fn advance_generation(board: &mut Vec<Vec<u8>>) {
+    //let mut new_board: Vec<Vec<u8>> = vec![vec![0; board.len()]; board[0].len()];
 }
