@@ -5,3 +5,4 @@ authors = ["Nathan Wallace <thegoofeedude+gh@gmail.com>"]
 
 [dependencies]
 rand="0.3.0"
+ncurses = "5.80.0"

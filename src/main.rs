@@ -1,32 +1,37 @@
 extern crate rand;
 use rand::Rng;
 
+extern crate ncurses;
+use ncurses::*;
+
 fn main() {
-    // FUTURE: can get width, height, population density, and num_generations from user:
-    // width and height hould be greater than 0 and less than 100
-    let width:           usize        = 15;
-    let height:          usize        = 15;
-    let num_generations: u8           = 10;
+    initscr();
+
+    let mut max_x = 0;
+    let mut max_y = 0;
+    getmaxyx(stdscr, &mut max_y, &mut max_x);
+
+    // TODO Validate max_x, max_y
+    let width:           usize        = ((max_x / 3) - 1) as usize;
+    let height:          usize        = (max_y - 2) as usize;
+    let num_generations: u32           = 500;
     // board: the canonical Vec representing the state of our cells
-    let mut board:       Vec<Vec<u8>> = vec![vec![0; height]; width];
+    let mut board:       Vec<Vec<u8>> = vec![vec![0; width]; height];
     // tmp_board: Temporary board used to calculate intermediate states before
     // writing them to board.
-    let mut tmp_board:   Vec<Vec<u8>> = vec![vec![0; height]; width];
+    let mut tmp_board:   Vec<Vec<u8>> = vec![vec![0; width]; height];
 
     populate_board_random(&mut board, 20);
-    hacky_and_bad_screen_clear();
 
-    print_board(&board);
-    println!("Cur Gen: 0 (Initial State)");
-    std::thread::sleep(std::time::Duration::new(1, 0));
-
-    for cur_generation in 1..(num_generations + 1) {
-        advance_generation(&mut board, &mut tmp_board);
-        std::thread::sleep(std::time::Duration::new(1, 0));
-        hacky_and_bad_screen_clear();
+    for cur_generation in 0..(num_generations + 1) {
         print_board(&board);
-        println!("Cur Gen: {}", cur_generation);
+        printw(&format!("Cur Gen: {}", cur_generation));
+        refresh();
+        std::thread::sleep(std::time::Duration::from_millis(20));
+        advance_generation(&mut board, &mut tmp_board);
     }
+    // getch(); // TODO "Press any key to quit" without leaving characters on the terminal
+    endwin();
 }
 
 /// Populates the given board with a generation containing
@@ -136,31 +141,30 @@ fn calculate_next_state(board: &Vec<Vec<u8>>, row_num: usize, cell_num: usize) -
     }
 }
 
-/// Prints the given board
-/// Assumes board has dimensions greater than [0][0] and smaller than [100][100]
+/// Prints the given board to stdscr
+/// Assumes board has width smaller than 100
+/// TODO: Pass in an ncurses window and update that instead of directly using stdscr
 fn print_board(board: &Vec<Vec<u8>>) {
+    let mut screen_row = 0;
+    let screen_col = 0;
+    wmove(stdscr, screen_row, screen_col);
     for cell_num in 0..(board[0].len() + 1) {
-        print!("{:3}", cell_num);
+        printw(&format!("{:3}", cell_num));
     }
-    println!("");
+    screen_row += 1;
+    wmove(stdscr, screen_row, 0);
     let mut row_num: u8 = 1;
     for row in board {
-        print!("{:3}", row_num);
+        printw(&format!("{:3}", row_num));
         row_num = row_num + 1;
         for cell in row {
             if *cell == 0 {
-                print!("   ");
+                printw("   ");
             } else {
-                print!("  +");
+                printw("  +");
             }
         }
-        println!("");
-    }
-}
-
-fn hacky_and_bad_screen_clear()
-{
-    if !std::process::Command::new("clear").status().unwrap().success() {
-        assert!(false);
+        screen_row += 1;
+        wmove(stdscr, screen_row, 0);
     }
 }
