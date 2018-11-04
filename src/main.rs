@@ -9,7 +9,7 @@ fn main() {
 
     let mut max_x = 0;
     let mut max_y = 0;
-    getmaxyx(stdscr, &mut max_y, &mut max_x);
+    getmaxyx(stdscr(), &mut max_y, &mut max_x);
 
     // TODO Validate max_x, max_y
     let width:           usize        = ((max_x / 3) - 1) as usize;
@@ -147,12 +147,12 @@ fn calculate_next_state(board: &Vec<Vec<u8>>, row_num: usize, cell_num: usize) -
 fn print_board(board: &Vec<Vec<u8>>) {
     let mut screen_row = 0;
     let screen_col = 0;
-    wmove(stdscr, screen_row, screen_col);
+    wmove(stdscr(), screen_row, screen_col);
     for cell_num in 0..(board[0].len() + 1) {
         printw(&format!("{:3}", cell_num));
     }
     screen_row += 1;
-    wmove(stdscr, screen_row, 0);
+    wmove(stdscr(), screen_row, 0);
     let mut row_num: u8 = 1;
     for row in board {
         printw(&format!("{:3}", row_num));
@@ -165,6 +165,6 @@ fn print_board(board: &Vec<Vec<u8>>) {
             }
         }
         screen_row += 1;
-        wmove(stdscr, screen_row, 0);
+        wmove(stdscr(), screen_row, 0);
     }
 }
